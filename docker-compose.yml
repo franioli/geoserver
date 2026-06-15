@@ -34,9 +34,9 @@ services:
       POSTGRES_PASS: ${POSTGRES_PASSWORD}
       POSTGRES_PORT: 5432
 
-      EXTRA_JAVA_OPTS: "-Xms256m -Xmx512m"
-    mem_limit: 1g
-    mem_reservation: 512m
+      EXTRA_JAVA_OPTS: "-Xms${GS_JAVA_XMS} -Xmx${GS_JAVA_XMX}"
+    mem_limit: ${GS_MEM_LIMIT}
+    mem_reservation: ${GS_MEM_RESERVATION}
     volumes:
       - geoserver_data:/opt/geoserver_data/
     networks:
