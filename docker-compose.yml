@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: geoserver
+      POSTGRES_USER: geoserver
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - geoserver_postgres_data:/var/lib/postgresql/data
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoserver -d geoserver"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  geoserver:
+    build:
+      context: .
+    restart: unless-stopped
+    environment:
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      PROXY_BASE_URL: ${GEOSERVER_PROXY_BASE_URL}
+      GEOSERVER_CSRF_WHITELIST: ${GEOSERVER_DOMAIN}
+      SKIP_DEMO_DATA: "true"
+      CORS_ENABLED: "true"
+      EXTRA_JAVA_OPTS: "-Xms256m -Xmx512m"
+    mem_limit: 1g
+    mem_reservation: 512m
+    volumes:
+      - geoserver_data:/opt/geoserver_data/
+    networks:
+      - dokploy-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  geoserver_postgres_data:
+  geoserver_data:
+
+networks:
+  dokploy-network:
+    external: true
